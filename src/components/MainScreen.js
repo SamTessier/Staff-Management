@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IconButton,
   Grid,
@@ -18,14 +18,53 @@ import { getStudents, getStaff } from "../localStorageDB";
 
 const MainScreen = () => {
   const [searchTerm, setSearchTerm] = useState("");
+
+
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
-  let data = searchTerm !== "" ? [...getStudents(), ...getStaff()] : [];
-  data = data.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); 
+  const [searchTerms, setSearchTerms] = useState(['name', 'school']);
+
+  // let data = searchTerm !== "" ? [...getStudents(), ...getStaff()] : [];
+  // data = data.filter((item) =>
+  //   item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+  // let data = searchTerm !== "" ? [...getStudents(), ...getStaff()] : [];
+  // data = data.filter(item =>
+  //   item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  useEffect(() => {
+    const loadData = async () => {
+      const students = await getStudents();
+      const staff = await getStaff();
+      console.log({students, staff})
+      setData([...students, ...staff]);
+      setFilteredData([...students, ...staff]);
+    }
+    console.log('load data')
+    loadData();
+  }, [])
+
+  useEffect(() => {
+    console.log(searchTerm)
+    const filtered = data.filter(item => {
+      return searchTerms.some(key => {
+        return item[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
+      })
+    })
+
+    console.log({filtered})
+
+    setFilteredData(filtered);
+  }, [searchTerm])
+
+
+
 
   const handleDetailsOpen = (student) => {
     setSelectedStudent(student);
@@ -96,30 +135,21 @@ const MainScreen = () => {
             )}
           </Grid>
         </Grid>
-        <Grid item>
-          <Grid container direction="column" spacing={2} alignItems="center">
-            {searchTerm &&
-              data.map((item, index) => (
-                <Grid
-                  key={index}
-                  container
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Grid item>
-                    <Typography variant="body1">{item.name}</Typography>
-                  </Grid>
-                  <Grid item>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleDetailsOpen(item)}
-                    >
-                      <InfoIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              ))}
-          </Grid>
+      </Grid>
+      <Grid item>
+        <Grid container direction="column" spacing={2} alignItems="center">
+          {filteredData.map((item, index) => (
+            <Grid key={index} container justifyContent="space-between" alignItems="center">
+              <Grid item>
+                <Typography variant="body1">{item.name}</Typography>
+              </Grid>
+              <Grid item>
+                <IconButton color="primary" onClick={() => handleDetailsOpen(item)}>
+                  <InfoIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+          ))}
         </Grid>
         {selectedStudent && (
           <StudentDetails
