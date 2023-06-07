@@ -7,7 +7,7 @@ const form = {
                 variant: 'h6',
             },
         }
-    }
+    },
     content:{
         name: {
             label: 'Name:',
@@ -16,7 +16,7 @@ const form = {
                 variant: 'h6',
             },
         }
-    }
+    },
     actions: {
         handleClose: {
             label: 'Close',
